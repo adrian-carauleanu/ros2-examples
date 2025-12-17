@@ -1,7 +1,2 @@
-./examples/*
-./ros_tutorials/*src/example/
-src/ros_tutorials/
-example/
-ros_tutorials/
-examples/
-ros_tutorials/
+# Ignore all files in the examples directory
+examples/*
