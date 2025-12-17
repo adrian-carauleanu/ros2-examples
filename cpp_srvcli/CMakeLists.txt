@@ -8,13 +8,18 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(example_interfaces REQUIRED)
+#find_package(example_interfaces REQUIRED)
+find_package(tutorial_interfaces REQUIRED)
 
-add_executable(add_server src/add_two_ints_server.cpp)
-target_link_libraries(add_server PUBLIC rclcpp::rclcpp ${example_interfaces_TARGETS})
+# refactored: use add_three_ints sources
+add_executable(add_server src/add_three_ints_server.cpp)
+#target_link_libraries(add_server PUBLIC rclcpp::rclcpp ${example_interfaces_TARGETS})
+target_link_libraries(add_server PUBLIC rclcpp::rclcpp ${tutorial_interfaces_TARGETS})
 
-add_executable(add_client src/add_two_ints_client.cpp)
-target_link_libraries(add_client PUBLIC rclcpp::rclcpp ${example_interfaces_TARGETS})
+# refactored: use add_three_ints sources
+add_executable(add_client src/add_three_ints_client.cpp)
+#target_link_libraries(add_client PUBLIC rclcpp::rclcpp ${example_interfaces_TARGETS})
+target_link_libraries(add_client PUBLIC rclcpp::rclcpp ${tutorial_interfaces_TARGETS})
 
 install(TARGETS 
   add_server
