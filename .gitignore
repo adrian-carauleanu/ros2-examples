@@ -1,2 +1,3 @@
 ./examples/*
-./ros_tutorials/*
+./ros_tutorials/*src/example/
+src/ros_tutorials/
