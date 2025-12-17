@@ -1,3 +1,5 @@
 ./examples/*
 ./ros_tutorials/*src/example/
 src/ros_tutorials/
+example/
+ros_tutorials/
