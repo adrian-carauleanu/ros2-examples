@@ -1,0 +1,6 @@
+<library path="point_display">
+  <class name="Point2D" type="rviz_point2d_plugin::PointDisplay" base_class_type="rviz_common::Display">
+    <description>RVIz to display a point</description>
+    <message_type>rviz_point2d_plugin_msgs/msg/Point2D</message_type>
+  </class>
+</library>
