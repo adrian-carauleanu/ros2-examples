@@ -1,0 +1,4 @@
+# Request (sets distance for all vehicles)
+int64 vehicle_distance
+---
+# Response

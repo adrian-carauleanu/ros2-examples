@@ -62,6 +62,12 @@ ACCSimulationNode::ACCSimulationNode(const std::string& node_name)
         std::bind(&ACCSimulationNode::handleRemoveVehicle, this,
                   std::placeholders::_1, std::placeholders::_2));
 
+    // Create services for vehicle management
+    set_vehicle_distance_service_ = this->create_service<acc_simulation_interfaces::srv::SetAccVehicleDistance>(
+        "set_vehicle_distance",
+        std::bind(&ACCSimulationNode::handleSetVehicleDistance, this, 
+                  std::placeholders::_1, std::placeholders::_2));                  
+
     RCLCPP_INFO(this->get_logger(), "ACC Simulation Node initialized");
 }
 
@@ -84,7 +90,17 @@ visualization_msgs::msg::MarkerArray ACCSimulationNode::createMarkers() {
 
 void ACCSimulationNode::createRoadMarkers(
     visualization_msgs::msg::MarkerArray& markers) {
-    // Create road surface (vertical along Y-axis)
+    
+    const auto& vehicles = simulation_.getVehicles();
+    if (vehicles.empty()) {
+        return;
+    }
+    
+    // Get lead vehicle position for camera-following behavior
+    double lead_y = vehicles[0]->getPositionY();
+    double camera_offset = 100.0;  // Keep lead vehicle 100m ahead on screen
+    
+    // Create road surface (vertical along Y-axis, positioned relative to lead vehicle)
     visualization_msgs::msg::Marker road_marker;
     road_marker.header.frame_id = "map";
     road_marker.header.stamp = this->now();
@@ -94,7 +110,7 @@ void ACCSimulationNode::createRoadMarkers(
     road_marker.action = visualization_msgs::msg::Marker::ADD;
     
     road_marker.pose.position.x = 0.0;
-    road_marker.pose.position.y = road_.getLength() / 2.0;
+    road_marker.pose.position.y = camera_offset;  // Centered on camera position
     road_marker.pose.position.z = -0.1;
     road_marker.pose.orientation.w = 1.0;
     
@@ -109,10 +125,22 @@ void ACCSimulationNode::createRoadMarkers(
     
     markers.markers.push_back(road_marker);
 
-    // Create lane markings (vertical along Y-axis)
+    // Create lane markings that loop infinitely (relative to camera)
     int marking_id = 1;
-    for (double y = 0.0; y < road_.getLength(); 
-         y += road_.getLaneMarkingDistance()) {
+    double marking_distance = road_.getLaneMarkingDistance();
+    
+    // Calculate offset for looping: use modulo to create repeating pattern
+    double lead_offset = std::fmod(lead_y - camera_offset, marking_distance);
+    if (lead_offset < 0) lead_offset += marking_distance;
+    
+    // Show markings from 150m behind to 300m ahead
+    double marking_start = -150.0;
+    double marking_end = 300.0;
+    
+    for (double y = marking_start; y < marking_end; y += marking_distance) {
+        // Adjust y position to create looping effect
+        double adjusted_y = y - lead_offset;
+        
         visualization_msgs::msg::Marker marking;
         marking.header.frame_id = "map";
         marking.header.stamp = this->now();
@@ -122,7 +150,7 @@ void ACCSimulationNode::createRoadMarkers(
         marking.action = visualization_msgs::msg::Marker::ADD;
         
         marking.pose.position.x = 0.0;
-        marking.pose.position.y = y;
+        marking.pose.position.y = adjusted_y;
         marking.pose.position.z = 0.01;
         marking.pose.orientation.w = 1.0;
         
@@ -142,6 +170,14 @@ void ACCSimulationNode::createRoadMarkers(
 void ACCSimulationNode::createVehicleMarkers(
     visualization_msgs::msg::MarkerArray& markers) {
     const auto& vehicles = simulation_.getVehicles();
+    
+    if (vehicles.empty()) {
+        return;
+    }
+    
+    // Get lead vehicle position for camera-following behavior
+    double lead_y = vehicles[0]->getPositionY();
+    double camera_offset = 100.0;  // Keep lead vehicle 100m ahead on screen
     
     // Send DELETE markers for vehicles that were removed
     if (vehicles.size() < last_vehicle_count_) {
@@ -172,6 +208,9 @@ void ACCSimulationNode::createVehicleMarkers(
         const auto& vehicle = vehicles[i];
         const auto& state = vehicle->getState();
         
+        // Calculate display position relative to lead vehicle (camera-following)
+        double relative_y = state.position_y - lead_y + camera_offset;
+        
         visualization_msgs::msg::Marker vehicle_marker;
         vehicle_marker.header.frame_id = "map";
         vehicle_marker.header.stamp = this->now();
@@ -181,7 +220,7 @@ void ACCSimulationNode::createVehicleMarkers(
         vehicle_marker.action = visualization_msgs::msg::Marker::ADD;
         
         vehicle_marker.pose.position.x = state.position_x;
-        vehicle_marker.pose.position.y = state.position_y;
+        vehicle_marker.pose.position.y = relative_y;
         vehicle_marker.pose.position.z = 1.0;
         
         // Set orientation based on heading
@@ -194,12 +233,12 @@ void ACCSimulationNode::createVehicleMarkers(
         vehicle_marker.scale.y = vehicle->getWidth();
         vehicle_marker.scale.z = 1.5;
         
-        // Color: lead vehicle in green, ego in red
+        // Color: lead vehicle in green, others in red with varying shades
         if (i == 0) {  // Lead vehicle
             vehicle_marker.color.r = 0.0;
             vehicle_marker.color.g = 1.0;
             vehicle_marker.color.b = 0.0;
-        } else {  // Ego vehicle
+        } else {  // Following vehicles
             vehicle_marker.color.r = 1.0;
             vehicle_marker.color.g = 0.0;
             vehicle_marker.color.b = 0.0;
@@ -219,12 +258,12 @@ void ACCSimulationNode::createVehicleMarkers(
         
         velocity_marker.points.resize(2);
         velocity_marker.points[0].x = state.position_x;
-        velocity_marker.points[0].y = state.position_y;
+        velocity_marker.points[0].y = relative_y;
         velocity_marker.points[0].z = 1.75;
         
         velocity_marker.points[1].x = state.position_x + 
                                       state.velocity * std::cos(state.heading) * 0.5;
-        velocity_marker.points[1].y = state.position_y + 
+        velocity_marker.points[1].y = relative_y + 
                                       state.velocity * std::sin(state.heading) * 0.5;
         velocity_marker.points[1].z = 1.75;
         
@@ -245,18 +284,8 @@ void ACCSimulationNode::simulationCallback() {
     // Update simulation
     simulation_.update();
     
-    // Wrap vehicles around when they exceed road length (vertical Y-axis)
-    const auto& vehicles = simulation_.getVehicles();
-    double road_length = road_.getLength();
-    for (auto& vehicle : vehicles) {
-        // Wrap position back to start if it exceeds road length
-        if (vehicle->getPositionY() > road_length) {
-            vehicle->setPosition(
-                vehicle->getState().position_x,
-                std::fmod(vehicle->getPositionY(), road_length)
-            );
-        }
-    }
+    // No wrapping - vehicles continue in absolute coordinates
+    // The visualization will be relative to the lead vehicle (camera follows lead)
     
     // Create and publish markers
     auto marker_array = createMarkers();
@@ -270,13 +299,14 @@ void ACCSimulationNode::simulationCallback() {
             RCLCPP_INFO(
                 this->get_logger(),
                 "Time: %.2fs | Lead: y=%.1f, v=%.1f m/s | "
-                "Ego: y=%.1f, v=%.1f m/s, a=%.2f m/s²",
+                "Ego: y=%.1f, v=%.1f m/s, a=%.2f m/s², RelDist=%.1f m",
                 simulation_.getSimulationTime(),
                 vehicles[0]->getPositionY(),
                 vehicles[0]->getVelocity(),
                 vehicles[1]->getPositionY(),
                 vehicles[1]->getVelocity(),
-                vehicles[1]->getState().acceleration);
+                vehicles[1]->getState().acceleration,
+                vehicles[1]->getPositionY() - vehicles[0]->getPositionY());
         }
     }
 }
@@ -318,5 +348,13 @@ void ACCSimulationNode::handleRemoveVehicle(
         RCLCPP_WARN(this->get_logger(), 
                     "Cannot remove vehicle - need at least 1 vehicle");
     }
+}
+
+void ACCSimulationNode::handleSetVehicleDistance(
+    const std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Request> request,
+    std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Response> response) {
+    (void)response;
+    
+    simulation_.SetDesiredDistance(request->vehicle_distance);   
 }
 

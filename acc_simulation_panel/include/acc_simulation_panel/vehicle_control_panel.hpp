@@ -6,9 +6,11 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <rviz_common/panel.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include "acc_simulation_interfaces/srv/set_acc_vehicle_distance.hpp"
 
 class QSpinBox;
 class QPushButton;
@@ -29,6 +31,7 @@ class VehicleControlPanel : public rviz_common::Panel {
   void onAddVehicleClicked();
   void onRemoveVehicleClicked();
   void onGetInfoClicked();
+  void onDistanceChanged(double value);
 
  private:
   void updateUI();
@@ -42,11 +45,14 @@ class VehicleControlPanel : public rviz_common::Panel {
   QLabel* status_label_;
   QLabel* vehicle_count_label_;
   QSpinBox* vehicle_id_spinbox_;
+  QDoubleSpinBox* distance_spinbox_;
+  QLabel* distance_value_label_;
 
   // ROS node and service clients
   std::shared_ptr<rclcpp::Node> ros_node_;
   rclcpp::Client<std_srvs::srv::Empty>::SharedPtr add_vehicle_client_;
   rclcpp::Client<std_srvs::srv::Empty>::SharedPtr remove_vehicle_client_;
+  rclcpp::Client<acc_simulation_interfaces::srv::SetAccVehicleDistance>::SharedPtr set_vehicle_distance_client_;
 };
 
 }  // namespace acc_simulation_panel

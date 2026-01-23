@@ -1,6 +1,6 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 78
+    Help Height: 0
     Name: Displays
     Property Tree Widget:
       Expanded:
@@ -9,7 +9,7 @@ Panels:
         - /MarkerArray1/Topic1
         - /MarkerArray1/Namespaces1
       Splitter Ratio: 0.5
-    Tree Height: 267
+    Tree Height: 140
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -108,25 +108,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 636.3887329101562
+      Distance: 105.05794525146484
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -260.3089294433594
-        Y: 437.5674743652344
-        Z: -245.8122100830078
+        X: -3.0045745372772217
+        Y: 53.30237579345703
+        Z: 7.888063907623291
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5197974443435669
+      Pitch: 1.5697963237762451
       Target Frame: map
       Value: Orbit (rviz_default_plugins)
-      Yaw: 5.351589202880859
+      Yaw: 6.282384872436523
     Saved: ~
 Window Geometry:
   Displays:
@@ -134,10 +134,12 @@ Window Geometry:
   Height: 1011
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001c900000395fc0200000004fb000000100044006900730070006c006100790073010000003f00000199000000cc00fffffffb0000001200530065006c0065006300740069006f006e01000001de0000005d0000005d00fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000241000000ab0000005d00fffffffb0000000a0056006900650077007301000002f2000000e2000000a900ffffff0000056f0000039500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000001c900000395fc0200000005fb000000100044006900730070006c006100790073010000003f000000cc000000cc00fffffffb0000001200530065006c0065006300740069006f006e01000001110000005d0000005d00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007301000001740000007c0000005d00fffffffb0000000a0056006900650077007301000001f6000000a9000000a900fffffffb0000001e00560065006800690063006c006500200043006f006e00740072006f006c01000002a50000012f0000012f00ffffff0000056f0000039500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
+    collapsed: false
+  Vehicle Control:
     collapsed: false
   Views:
     collapsed: false

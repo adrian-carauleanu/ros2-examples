@@ -8,7 +8,7 @@
 #include "acc_simulation/vehicle.hpp"
 #include "acc_simulation/acc_controller.hpp"
 #include "acc_simulation/road.hpp"
-
+#include "acc_simulation_interfaces/srv/set_acc_vehicle_distance.hpp"
 /**
  * @brief ROS 2 node for adaptive cruise control simulation with RViz visualization
  */
@@ -57,9 +57,15 @@ private:
     void handleRemoveVehicle(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
                              std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
+    /**
+     * @brief Set the desired distance for vehicles
+     */
+    void handleSetVehicleDistance(const std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Request> request,
+                                  std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Response> response);
+
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr add_vehicle_service_;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr remove_vehicle_service_;
-
+    rclcpp::Service<acc_simulation_interfaces::srv::SetAccVehicleDistance>::SharedPtr set_vehicle_distance_service_;
 public:
     explicit ACCSimulationNode(const std::string& node_name = "acc_simulation");
 

@@ -15,6 +15,7 @@ find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(acc_simulation_interfaces REQUIRED)
 
 # Include directories
 include_directories(include)
@@ -26,18 +27,29 @@ add_library(acc_simulation_lib
   src/acc_simulation_node.cpp
 )
 
-ament_target_dependencies(acc_simulation_lib
-  rclcpp
-  std_msgs
-  std_srvs
-  geometry_msgs
-  visualization_msgs
+# ament_target_dependencies(acc_simulation_lib
+#    rclcpp
+#    std_msgs
+#    std_srvs
+#    geometry_msgs
+#    visualization_msgs
+#    acc_simulation_interfaces::acc_simulation_interfaces
+# )
+
+target_link_libraries(acc_simulation_lib PUBLIC
+  ${geometry_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  ${acc_simulation_interfaces_TARGETS}
+  rclcpp::rclcpp
 )
 
 # Add executable
 add_executable(acc_simulation_node src/main.cpp)
-target_link_libraries(acc_simulation_node acc_simulation_lib)
-ament_target_dependencies(acc_simulation_node rclcpp)
+target_link_libraries(acc_simulation_node PUBLIC 
+                      acc_simulation_lib) 
+#ament_target_dependencies(acc_simulation_node rclcpp)
 
 install(TARGETS acc_simulation_node
   DESTINATION lib/${PROJECT_NAME})

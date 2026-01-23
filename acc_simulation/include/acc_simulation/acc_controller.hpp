@@ -103,6 +103,14 @@ public:
 
     double getSimulationTime() const { return simulation_time_; }
     size_t getVehicleCount() const { return vehicles_.size(); }
+
+    void SetDesiredDistance(double distance) {
+        if (controller_) {
+            if (auto acc_controller = dynamic_cast<SimpleACCController*>(controller_.get())) {
+                acc_controller->setDesiredDistance(distance);
+            }
+        }
+    }
 };
 
 #endif  // ACC_SIMULATION__ACC_CONTROLLER_HPP_

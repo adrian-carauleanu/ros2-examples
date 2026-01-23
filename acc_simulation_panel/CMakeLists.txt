@@ -17,6 +17,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rviz_common REQUIRED)
+find_package(acc_simulation_interfaces REQUIRED)
 
 qt5_wrap_cpp(MOC_FILES
   include/acc_simulation_panel/vehicle_control_panel.hpp
@@ -38,6 +39,7 @@ target_link_libraries(acc_simulation_panel_lib PUBLIC
   Qt5::Widgets
   rviz_common::rviz_common
   pluginlib::pluginlib
+  ${acc_simulation_interfaces_TARGETS}
 )
 
 install(TARGETS acc_simulation_panel_lib

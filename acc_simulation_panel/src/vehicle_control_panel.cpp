@@ -14,7 +14,7 @@ VehicleControlPanel::VehicleControlPanel(QWidget* parent)
   auto layout = new QVBoxLayout();
 
   // Title
-  auto title_label = new QLabel("Vehicle Control Panel");
+  auto title_label = new QLabel("ACC Simulation Control Panel");
   QFont title_font = title_label->font();
   title_font.setPointSize(12);
   title_font.setBold(true);
@@ -62,10 +62,37 @@ VehicleControlPanel::VehicleControlPanel(QWidget* parent)
   control_group->setLayout(control_layout);
   layout->addWidget(control_group);
 
+  // ACC Settings section
+  auto settings_group = new QGroupBox("ACC Settings");
+  auto settings_layout = new QVBoxLayout();
+
+  // Distance control
+  auto distance_layout = new QHBoxLayout();
+  auto distance_label = new QLabel("Desired Distance (m):");
+  distance_spinbox_ = new QDoubleSpinBox();
+  distance_spinbox_->setMinimum(5.0);
+  distance_spinbox_->setMaximum(100.0);
+  distance_spinbox_->setValue(30.0);
+  distance_spinbox_->setSingleStep(1.0);
+  distance_spinbox_->setDecimals(1);
+  
+  distance_value_label_ = new QLabel("30.0 m");
+  
+  connect(distance_spinbox_, SIGNAL(valueChanged(double)), this,
+          SLOT(onDistanceChanged(double)));
+  
+  distance_layout->addWidget(distance_label);
+  distance_layout->addWidget(distance_spinbox_);
+  distance_layout->addWidget(distance_value_label_);
+  settings_layout->addLayout(distance_layout);
+
+  settings_group->setLayout(settings_layout);
+  layout->addWidget(settings_group);
+
   layout->addStretch();
   setLayout(layout);
 
-  setWindowTitle("Vehicle Control");
+  setWindowTitle("ACC Simulation Control");
 }
 
 VehicleControlPanel::~VehicleControlPanel() = default;
@@ -139,6 +166,27 @@ void VehicleControlPanel::callGetVehicleCountService() {
   vehicle_count_label_->setText("Connected Vehicles: N/A");
 }
 
+void VehicleControlPanel::onDistanceChanged(double value) 
+{
+  distance_value_label_->setText(QString::number(value, 'f', 1) + " m");
+  status_label_->setText(QString("Desired distance set to ") + 
+                         QString::number(value, 'f', 1) + " m");
+
+  if (set_vehicle_distance_client_) 
+  {
+    if (!set_vehicle_distance_client_->wait_for_service(std::chrono::seconds(1))) 
+    {
+      status_label_->setText("Set vehicle distance service unavailable");
+      return;
+    }
+
+    auto distance_request = std::make_shared<acc_simulation_interfaces::srv::SetAccVehicleDistance::Request>();
+    distance_request->vehicle_distance = value;
+    auto future = set_vehicle_distance_client_->async_send_request(distance_request);
+
+    status_label_->setText("Setting vehicle distance...");
+  }
+}
 }  // namespace acc_simulation_panel
 
 #include <pluginlib/class_list_macros.hpp>

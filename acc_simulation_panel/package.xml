@@ -17,6 +17,7 @@
   <depend>Qt5Gui</depend>
   <depend>Qt5Widgets</depend>
   <depend>std_srvs</depend>
+  <depend>acc_simulation_interfaces</depend>
 
   <exec_depend>rviz2</exec_depend>
 
