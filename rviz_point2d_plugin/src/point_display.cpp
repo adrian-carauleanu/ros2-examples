@@ -11,7 +11,7 @@ void PointDisplay::onInitialize()
 {
   MFDClass::onInitialize();
   point_shape_ =
-    std::make_unique<rviz_rendering::Shape>(rviz_rendering::Shape::Type::Cube, scene_manager_,
+    std::make_unique<rviz_rendering::Shape>(rviz_rendering::Shape::Type::Sphere, scene_manager_,
       scene_node_);
 
   color_property_ = std::make_unique<rviz_common::properties::ColorProperty>(
