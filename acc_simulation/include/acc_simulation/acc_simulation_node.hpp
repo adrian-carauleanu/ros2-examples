@@ -10,8 +10,6 @@
 
 /**
  * @brief ROS 2 node for adaptive cruise control simulation with RViz visualization
- * 
- * Manages the simulation lifecycle and publishes visualization markers
  */
 class ACCSimulationNode : public rclcpp::Node {
 private:

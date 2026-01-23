@@ -6,8 +6,6 @@
 
 /**
  * @brief Represents the state of a vehicle in 2D space
- * 
- * Encapsulates position, velocity, and acceleration using RAII principles.
  */
 class VehicleState {
 public:
@@ -25,9 +23,7 @@ public:
 };
 
 /**
- * @brief Interface for vehicle dynamics model (Single Responsibility Principle)
- * 
- * Handles the physics of vehicle movement
+ * @brief Interface for vehicle dynamics model
  */
 class IDynamicsModel {
 public:
@@ -43,8 +39,6 @@ public:
 
 /**
  * @brief Simple kinematic vehicle model
- * 
- * Implements IDynamicsModel with basic kinematic equations
  */
 class KinematicModel : public IDynamicsModel {
 private:
@@ -60,9 +54,6 @@ public:
 
 /**
  * @brief Vehicle class encapsulating position, velocity, and dynamics
- * 
- * Uses RAII to manage dynamics model ownership
- * Single Responsibility: manages vehicle state and simulation
  */
 class Vehicle {
 private:
@@ -78,7 +69,7 @@ public:
     ~Vehicle() = default;  // RAII: dynamics_ is automatically cleaned up
 
     // Getters
-    const VehicleState& getState() const { return state_; }
+    const VehicleState& g
     double getLength() const { return length_; }
     double getWidth() const { return width_; }
     double getId() const { return state_.id; }

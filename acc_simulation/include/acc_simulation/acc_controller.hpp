@@ -6,9 +6,7 @@
 #include <vector>
 
 /**
- * @brief Interface for ACC control logic (Dependency Inversion Principle)
- * 
- * Defines contract for adaptive cruise control implementations
+ * @brief Interface for ACC control logic
  */
 class IACCController {
 public:
@@ -25,9 +23,7 @@ public:
 };
 
 /**
- * @brief Implements adaptive cruise control using simple PID-like control
- * 
- * Controls distance to lead vehicle while maintaining desired speed
+ * @brief Implements adaptive cruise control
  */
 class SimpleACCController : public IACCController {
 private:
@@ -63,9 +59,6 @@ public:
 
 /**
  * @brief Manages multiple vehicles and ACC control
- * 
- * Open/Closed Principle: Open for extension (new controllers), closed for modification
- * Uses composition to manage vehicles and controller
  */
 class ACCSimulation {
 private:
@@ -78,7 +71,7 @@ public:
     ACCSimulation(double time_step = 0.05)
         : simulation_time_(0.0), time_step_(time_step) {}
 
-    ~ACCSimulation() = default;  // RAII: vehicles and controller cleanup
+    ~ACCSimulation() = default;
 
     /**
      * @brief Add a vehicle to the simulation
