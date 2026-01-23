@@ -29,12 +29,20 @@ void ACCSimulation::addVehicle(std::unique_ptr<Vehicle> vehicle) {
     vehicles_.push_back(std::move(vehicle));
 }
 
+bool ACCSimulation::removeLastVehicle() {
+    if (vehicles_.size() <= 1) {
+        return false;  // Keep at least one vehicle
+    }
+    vehicles_.pop_back();
+    return true;
+}
+
 void ACCSimulation::setController(std::unique_ptr<IACCController> controller) {
     controller_ = std::move(controller);
 }
 
 void ACCSimulation::update() {
-    if (!controller_ || vehicles_.size() < 2) {
+    if (!controller_) {
         // Just update vehicle dynamics without ACC control
         for (auto& vehicle : vehicles_) {
             vehicle->update(time_step_);
@@ -43,10 +51,16 @@ void ACCSimulation::update() {
         return;
     }
 
-    // Assume first vehicle is lead, second is ego for ACC control
-    // Calculate acceleration for ego vehicle
-    double acc = controller_->calculateAcceleration(*vehicles_[1], *vehicles_[0]);
-    vehicles_[1]->setAcceleration(acc);
+    // Apply ACC control in a chain: each vehicle follows the one ahead of it
+    // vehicles_[0] is the lead vehicle (constant velocity)
+    // vehicles_[1] follows vehicles_[0]
+    // vehicles_[2] follows vehicles_[1], etc.
+    
+    for (size_t i = 1; i < vehicles_.size(); ++i) {
+        // Each vehicle follows the vehicle directly ahead of it
+        double acc = controller_->calculateAcceleration(*vehicles_[i], *vehicles_[i-1]);
+        vehicles_[i]->setAcceleration(acc);
+    }
 
     // Update all vehicles
     for (auto& vehicle : vehicles_) {

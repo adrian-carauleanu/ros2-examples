@@ -11,6 +11,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -28,6 +29,7 @@ add_library(acc_simulation_lib
 ament_target_dependencies(acc_simulation_lib
   rclcpp
   std_msgs
+  std_srvs
   geometry_msgs
   visualization_msgs
 )

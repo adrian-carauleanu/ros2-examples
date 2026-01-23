@@ -51,7 +51,26 @@ ACCSimulationNode::ACCSimulationNode(const std::string& node_name)
         std::chrono::milliseconds(period_ms),
         std::bind(&ACCSimulationNode::simulationCallback, this));
 
+    // Create services for vehicle management
+    add_vehicle_service_ = this->create_service<std_srvs::srv::Empty>(
+        "add_vehicle",
+        std::bind(&ACCSimulationNode::handleAddVehicle, this, 
+                  std::placeholders::_1, std::placeholders::_2));
+
+    remove_vehicle_service_ = this->create_service<std_srvs::srv::Empty>(
+        "remove_vehicle",
+        std::bind(&ACCSimulationNode::handleRemoveVehicle, this,
+                  std::placeholders::_1, std::placeholders::_2));
+
     RCLCPP_INFO(this->get_logger(), "ACC Simulation Node initialized");
+}
+
+ACCSimulationNode::~ACCSimulationNode() {
+    // Properly cancel the timer to stop logging and simulation
+    if (timer_) {
+        timer_->cancel();
+    }
+    RCLCPP_INFO(this->get_logger(), "ACC Simulation Node destroyed");
 }
 
 visualization_msgs::msg::MarkerArray ACCSimulationNode::createMarkers() {
@@ -123,6 +142,31 @@ void ACCSimulationNode::createRoadMarkers(
 void ACCSimulationNode::createVehicleMarkers(
     visualization_msgs::msg::MarkerArray& markers) {
     const auto& vehicles = simulation_.getVehicles();
+    
+    // Send DELETE markers for vehicles that were removed
+    if (vehicles.size() < last_vehicle_count_) {
+        for (size_t i = vehicles.size(); i < last_vehicle_count_; ++i) {
+            // Delete vehicle marker
+            visualization_msgs::msg::Marker delete_vehicle_marker;
+            delete_vehicle_marker.header.frame_id = "map";
+            delete_vehicle_marker.header.stamp = this->now();
+            delete_vehicle_marker.ns = "vehicles";
+            delete_vehicle_marker.id = i;
+            delete_vehicle_marker.action = visualization_msgs::msg::Marker::DELETE;
+            markers.markers.push_back(delete_vehicle_marker);
+            
+            // Delete velocity vector marker
+            visualization_msgs::msg::Marker delete_velocity_marker;
+            delete_velocity_marker.header.frame_id = "map";
+            delete_velocity_marker.header.stamp = this->now();
+            delete_velocity_marker.ns = "velocity_vectors";
+            delete_velocity_marker.id = i;
+            delete_velocity_marker.action = visualization_msgs::msg::Marker::DELETE;
+            markers.markers.push_back(delete_velocity_marker);
+        }
+    }
+    
+    last_vehicle_count_ = vehicles.size();
     
     for (size_t i = 0; i < vehicles.size(); ++i) {
         const auto& vehicle = vehicles[i];
@@ -236,3 +280,43 @@ void ACCSimulationNode::simulationCallback() {
         }
     }
 }
+
+void ACCSimulationNode::handleAddVehicle(
+    const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response) {
+    (void)request;
+    (void)response;
+    
+    const auto& vehicles = simulation_.getVehicles();
+    int num_vehicles = vehicles.size();
+    
+    // Create a new vehicle behind the last one
+    double new_y = vehicles.back()->getPositionY() - 40.0;
+    if (new_y < 0.0) new_y = 0.0;
+    
+    auto new_vehicle = std::make_unique<Vehicle>(
+        num_vehicles, road_.getLaneYPosition(0), new_y, 4.5, 2.0);
+    new_vehicle->setVelocity(10.0);
+    new_vehicle->setHeading(M_PI / 2.0);
+    
+    simulation_.addVehicle(std::move(new_vehicle));
+    RCLCPP_INFO(this->get_logger(), "Vehicle added. Total vehicles: %zu", 
+                simulation_.getVehicleCount());
+}
+
+void ACCSimulationNode::handleRemoveVehicle(
+    const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+    std::shared_ptr<std_srvs::srv::Empty::Response> response) {
+    (void)request;
+    (void)response;
+    
+    if (simulation_.removeLastVehicle()) {
+        RCLCPP_INFO(this->get_logger(), 
+                    "Vehicle removed. Total vehicles: %ld", 
+                    simulation_.getVehicleCount());
+    } else {
+        RCLCPP_WARN(this->get_logger(), 
+                    "Cannot remove vehicle - need at least 1 vehicle");
+    }
+}
+

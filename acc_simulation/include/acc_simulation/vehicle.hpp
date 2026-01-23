@@ -69,7 +69,7 @@ public:
     ~Vehicle() = default;  // RAII: dynamics_ is automatically cleaned up
 
     // Getters
-    const VehicleState& g
+    const VehicleState& getState() const { return state_; }
     double getLength() const { return length_; }
     double getWidth() const { return width_; }
     double getId() const { return state_.id; }

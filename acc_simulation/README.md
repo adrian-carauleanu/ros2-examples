@@ -125,6 +125,30 @@ The simulation publishes to `/visualization_marker_array` with:
 - **Red vehicle**: Following vehicle (ego) with ACC control
 - **Blue arrows**: Velocity vectors for each vehicle
 
+## Dynamic Vehicle Management
+
+The simulation supports adding and removing vehicles during runtime using ROS 2 services.
+
+### Add Vehicle Service
+```bash
+ros2 service call /acc_simulation_node/add_vehicle std_srvs/srv/Empty {}
+```
+Creates a new vehicle positioned 40 meters behind the last vehicle.
+
+### Remove Vehicle Service
+```bash
+ros2 service call /acc_simulation_node/remove_vehicle std_srvs/srv/Empty {}
+```
+Removes the last vehicle (at least 1 vehicle must remain).
+
+### RViz Panel
+Launch the RViz panel for interactive vehicle management:
+1. In RViz: Panels → Add new panel
+2. Select `acc_simulation_panel::VehicleControlPanel`
+3. Use the buttons to add/remove vehicles
+
+See [VEHICLE_MANAGEMENT.md](docs/VEHICLE_MANAGEMENT.md) for detailed usage instructions.
+
 ## Control Algorithm
 
 The ACC controller uses a combined distance and speed error feedback:

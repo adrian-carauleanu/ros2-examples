@@ -80,6 +80,12 @@ public:
     void addVehicle(std::unique_ptr<Vehicle> vehicle);
 
     /**
+     * @brief Remove the last vehicle from the simulation
+     * @return True if a vehicle was removed, false if no vehicles to remove
+     */
+    bool removeLastVehicle();
+
+    /**
      * @brief Set the ACC controller
      * @param controller ACC controller (takes ownership)
      */

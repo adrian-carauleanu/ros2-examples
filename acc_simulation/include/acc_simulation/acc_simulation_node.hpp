@@ -4,6 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
+#include "std_srvs/srv/empty.hpp"
 #include "acc_simulation/vehicle.hpp"
 #include "acc_simulation/acc_controller.hpp"
 #include "acc_simulation/road.hpp"
@@ -19,6 +20,7 @@ private:
     ACCSimulation simulation_;
     Road road_;
     double update_frequency_;
+    size_t last_vehicle_count_ = 0;  // Track for marker deletion
 
     /**
      * @brief Create visualization markers for vehicles and road
@@ -43,10 +45,25 @@ private:
      */
     void simulationCallback();
 
+    /**
+     * @brief Add a new vehicle to the simulation
+     */
+    void handleAddVehicle(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                          std::shared_ptr<std_srvs::srv::Empty::Response> response);
+
+    /**
+     * @brief Remove the last vehicle from the simulation
+     */
+    void handleRemoveVehicle(const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+                             std::shared_ptr<std_srvs::srv::Empty::Response> response);
+
+    rclcpp::Service<std_srvs::srv::Empty>::SharedPtr add_vehicle_service_;
+    rclcpp::Service<std_srvs::srv::Empty>::SharedPtr remove_vehicle_service_;
+
 public:
     explicit ACCSimulationNode(const std::string& node_name = "acc_simulation");
 
-    ~ACCSimulationNode() override = default;
+    ~ACCSimulationNode() override;
 };
 
 #endif  // ACC_SIMULATION__ACC_SIMULATION_NODE_HPP_
