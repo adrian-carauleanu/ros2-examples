@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>acc_simulation_panel_qml</name>
+  <version>0.0.1</version>
+  <description>RViz panel for dynamic vehicle management in ACC simulation</description>
+  <maintainer email="adrian@example.com">Adrian</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rviz_common</depend>
+  <depend>pluginlib</depend>
+  <depend>Qt5Quick</depend>
+  <depend>Qt5QuickWidgets</depend>
+  <depend>Qt5Qml</depend>
+  <depend>std_srvs</depend>
+  <depend>acc_simulation_interfaces</depend>
+
+  <exec_depend>rviz2</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <rviz2 plugin="${prefix}/plugins.xml"/>
+  </export>
+</package>

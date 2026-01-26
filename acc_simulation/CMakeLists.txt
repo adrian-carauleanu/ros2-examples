@@ -27,15 +27,6 @@ add_library(acc_simulation_lib
   src/acc_simulation_node.cpp
 )
 
-# ament_target_dependencies(acc_simulation_lib
-#    rclcpp
-#    std_msgs
-#    std_srvs
-#    geometry_msgs
-#    visualization_msgs
-#    acc_simulation_interfaces::acc_simulation_interfaces
-# )
-
 target_link_libraries(acc_simulation_lib PUBLIC
   ${geometry_msgs_TARGETS}
   ${std_msgs_TARGETS}
@@ -49,7 +40,6 @@ target_link_libraries(acc_simulation_lib PUBLIC
 add_executable(acc_simulation_node src/main.cpp)
 target_link_libraries(acc_simulation_node PUBLIC 
                       acc_simulation_lib) 
-#ament_target_dependencies(acc_simulation_node rclcpp)
 
 install(TARGETS acc_simulation_node
   DESTINATION lib/${PROJECT_NAME})

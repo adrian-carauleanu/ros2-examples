@@ -1,0 +1,9 @@
+<library path="acc_simulation_panel_lib">
+  <class name="acc_simulation_panel_qml/AccSimulationPanel"
+         type="acc_simulation_panel_qml::AccSimulationPanel"
+         base_class_type="rviz_common::Panel">
+    <description>
+      A panel for controlling vehicle addition and removal in the ACC simulation.
+    </description>
+  </class>
+</library>
