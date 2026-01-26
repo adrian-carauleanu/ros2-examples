@@ -28,12 +28,12 @@ ACCSimulationNode::ACCSimulationNode(const std::string& node_name)
 
     // Create two vehicles: lead and ego (running vertically along Y-axis)
     auto lead_vehicle = std::make_unique<Vehicle>(
-        0, road_.getLaneYPosition(0), 100.0, 4.5, 2.0);
+        0, road_.getLaneYPosition(1), 100.0, 4.5, 2.0);
     lead_vehicle->setVelocity(15.0);  // Constant velocity
     lead_vehicle->setHeading(M_PI / 2.0);  // Point upward (90 degrees)
 
     auto ego_vehicle = std::make_unique<Vehicle>(
-        1, road_.getLaneYPosition(0), 50.0, 4.5, 2.0);
+        1, road_.getLaneYPosition(1), 50.0, 4.5, 2.0);
     ego_vehicle->setVelocity(10.0);  // Starting slower
     ego_vehicle->setHeading(M_PI / 2.0);  // Point upward (90 degrees)
 
@@ -325,7 +325,7 @@ void ACCSimulationNode::handleAddVehicle(
     if (new_y < 0.0) new_y = 0.0;
     
     auto new_vehicle = std::make_unique<Vehicle>(
-        num_vehicles, road_.getLaneYPosition(0), new_y, 4.5, 2.0);
+        num_vehicles, road_.getLaneYPosition(1), new_y, 4.5, 2.0);
     new_vehicle->setVelocity(10.0);
     new_vehicle->setHeading(M_PI / 2.0);
     
@@ -354,7 +354,9 @@ void ACCSimulationNode::handleSetVehicleDistance(
     const std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Request> request,
     std::shared_ptr<acc_simulation_interfaces::srv::SetAccVehicleDistance::Response> response) {
     (void)response;
-    
+    RCLCPP_INFO(this->get_logger(), 
+                "Desired distance to be set to: %ld meters.",
+                request->vehicle_distance);
     simulation_.SetDesiredDistance(request->vehicle_distance);   
 }
 

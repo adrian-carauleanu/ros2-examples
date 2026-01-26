@@ -30,18 +30,15 @@ class VehicleControlPanel : public rviz_common::Panel {
  private Q_SLOTS:
   void onAddVehicleClicked();
   void onRemoveVehicleClicked();
-  void onGetInfoClicked();
   void onDistanceChanged(double value);
 
  private:
-  void updateUI();
   void callAddVehicleService();
   void callRemoveVehicleService();
   void callGetVehicleCountService();
 
   QPushButton* add_vehicle_button_;
   QPushButton* remove_vehicle_button_;
-  QPushButton* get_info_button_;
   QLabel* status_label_;
   QLabel* vehicle_count_label_;
   QSpinBox* vehicle_id_spinbox_;

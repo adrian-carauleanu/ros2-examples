@@ -50,15 +50,7 @@ VehicleControlPanel::VehicleControlPanel(QWidget* parent)
           SLOT(onRemoveVehicleClicked()));
   remove_button_layout->addWidget(remove_vehicle_button_);
   control_layout->addLayout(remove_button_layout);
-
-  // Info button
-  auto info_button_layout = new QHBoxLayout();
-  get_info_button_ = new QPushButton("Update Info");
-  connect(get_info_button_, SIGNAL(clicked()), this,
-          SLOT(onGetInfoClicked()));
-  info_button_layout->addWidget(get_info_button_);
-  control_layout->addLayout(info_button_layout);
-
+  
   control_group->setLayout(control_layout);
   layout->addWidget(control_group);
 
@@ -108,6 +100,7 @@ void VehicleControlPanel::onInitialize() {
   // Create service clients
   add_vehicle_client_ = ros_node_->create_client<std_srvs::srv::Empty>("add_vehicle");
   remove_vehicle_client_ = ros_node_->create_client<std_srvs::srv::Empty>("remove_vehicle");
+  set_vehicle_distance_client_ = ros_node_->create_client<acc_simulation_interfaces::srv::SetAccVehicleDistance>("set_vehicle_distance");
   
   status_label_->setText("Connected to ACC Simulation");
 }
@@ -118,14 +111,6 @@ void VehicleControlPanel::onAddVehicleClicked() {
 
 void VehicleControlPanel::onRemoveVehicleClicked() {
   callRemoveVehicleService();
-}
-
-void VehicleControlPanel::onGetInfoClicked() {
-  updateUI();
-}
-
-void VehicleControlPanel::updateUI() {
-  status_label_->setText("Info updated");
 }
 
 void VehicleControlPanel::callAddVehicleService() {
@@ -171,7 +156,7 @@ void VehicleControlPanel::onDistanceChanged(double value)
   distance_value_label_->setText(QString::number(value, 'f', 1) + " m");
   status_label_->setText(QString("Desired distance set to ") + 
                          QString::number(value, 'f', 1) + " m");
-
+          
   if (set_vehicle_distance_client_) 
   {
     if (!set_vehicle_distance_client_->wait_for_service(std::chrono::seconds(1))) 
@@ -180,11 +165,13 @@ void VehicleControlPanel::onDistanceChanged(double value)
       return;
     }
 
+    auto logger = rclcpp::get_logger("my_panel_logger");
+    RCLCPP_WARN(logger, 
+            "Calling the SetAccVehicleDistance service to set distance to: %f meters.",
+            value);
     auto distance_request = std::make_shared<acc_simulation_interfaces::srv::SetAccVehicleDistance::Request>();
     distance_request->vehicle_distance = value;
     auto future = set_vehicle_distance_client_->async_send_request(distance_request);
-
-    status_label_->setText("Setting vehicle distance...");
   }
 }
 }  // namespace acc_simulation_panel
